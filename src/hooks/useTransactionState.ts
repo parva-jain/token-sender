@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
-import { toast } from 'react-toastify';
-import { BaseError } from 'wagmi';
+import { useEffect } from "react";
+import { toast } from "react-toastify";
+import { BaseError } from "wagmi";
 
 export function useTransactionState(
   isConfirming: boolean,
@@ -35,13 +35,17 @@ export function useTransactionState(
       } else if (event.key === "isTokenAddressVerified") {
         setIsTokenAddressVerified(event.newValue === "true");
       } else if (event.key === "isReplaced") {
-        window.dispatchEvent(new CustomEvent('replacedStateChange', {
-          detail: { isReplaced: event.newValue === "true" }
-        }));
+        window.dispatchEvent(
+          new CustomEvent("replacedStateChange", {
+            detail: { isReplaced: event.newValue === "true" },
+          })
+        );
       } else if (event.key === "newHash") {
-        window.dispatchEvent(new CustomEvent('newHashChange', {
-          detail: { newHash: event.newValue || "" }
-        }));
+        window.dispatchEvent(
+          new CustomEvent("newHashChange", {
+            detail: { newHash: event.newValue || "" },
+          })
+        );
       } else if (event.key === "toastMessage" && event.newValue) {
         const toastType = localStorage.getItem("toastType");
         switch (toastType) {
@@ -58,9 +62,11 @@ export function useTransactionState(
             toast(event.newValue);
         }
       } else if (event.key === "isPending") {
-        window.dispatchEvent(new CustomEvent('pendingStateChange', {
-          detail: { isPending: event.newValue === "true" }
-        }));
+        window.dispatchEvent(
+          new CustomEvent("pendingStateChange", {
+            detail: { isPending: event.newValue === "true" },
+          })
+        );
       }
     };
 
@@ -75,14 +81,14 @@ export function useTransactionState(
       setRecipient("");
       setAmount("");
       setIsTokenAddressVerified(false);
-    localStorage.removeItem("isTokenAddressVerified");
-    localStorage.removeItem("tokenAddress");
-    localStorage.removeItem("recipient");
-    localStorage.removeItem("amount");
-    localStorage.removeItem("isReplaced");
-    localStorage.removeItem("newHash");
-  }
-}, [isConfirming]);
+      localStorage.removeItem("isTokenAddressVerified");
+      localStorage.removeItem("tokenAddress");
+      localStorage.removeItem("recipient");
+      localStorage.removeItem("amount");
+      localStorage.removeItem("isReplaced");
+      localStorage.removeItem("newHash");
+    }
+  }, [isConfirming]);
 
   // Effect to show notification when transaction is confirmed
   useEffect(() => {
@@ -102,7 +108,6 @@ export function useTransactionState(
       localStorage.setItem("toastType", "error");
       localStorage.setItem("toastMessage", errorMessage);
       toast.error(errorMessage);
-      
     }
   }, [error]);
 }

@@ -6,12 +6,12 @@ interface TokenAddressInputProps {
   setIsTokenAddressVerified: (value: boolean) => void;
 }
 
-export function TokenAddressInput({ 
-  tokenAddress, 
-  setTokenAddress, 
+export function TokenAddressInput({
+  tokenAddress,
+  setTokenAddress,
   checkTokenValidity,
   isTokenAddressVerified,
-  setIsTokenAddressVerified
+  setIsTokenAddressVerified,
 }: TokenAddressInputProps) {
   return (
     <div className="flex flex-col gap-3 mb-6">
@@ -43,4 +43,4 @@ export function TokenAddressInput({
       </div>
     </div>
   );
-} 
+}

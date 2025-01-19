@@ -6,72 +6,87 @@ import { ToastContainer } from "react-toastify";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import { TokenAddressInput } from './TokenAddressInput';
-import { TransferForm } from './TransferForm';
-import { TransactionHashDisplay } from './TransactionHashDisplay';
-import { useTransactionState } from '../hooks/useTransactionState';
-import { useWalletBalance } from '../hooks/useWalletBalance';
+import { TokenAddressInput } from "./TokenAddressInput";
+import { TransferForm } from "./TransferForm";
+import { TransactionHashDisplay } from "./TransactionHashDisplay";
+import { useTransactionState } from "../hooks/useTransactionState";
+import { useWalletBalance } from "../hooks/useWalletBalance";
 
 export function SendTransaction() {
   // State variables for managing transaction data and UI state
   const [tokenAddress, setTokenAddress] = useState("");
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
-  const [isReplaced, setIsReplaced] = useState(() => localStorage.getItem("isReplaced") === "true");
-  const [newHash, setNewHash] = useState(() => localStorage.getItem("newHash") || "");
+  const [isReplaced, setIsReplaced] = useState(
+    () => localStorage.getItem("isReplaced") === "true"
+  );
+  const [newHash, setNewHash] = useState(
+    () => localStorage.getItem("newHash") || ""
+  );
   const [isTokenAddressVerified, setIsTokenAddressVerified] = useState(() => {
     const stored = localStorage.getItem("isTokenAddressVerified");
     return stored === "true";
   });
-  const [localIsPending, setLocalIsPending] = useState(() => localStorage.getItem("isPending") === "true");
+  const [localIsPending, setLocalIsPending] = useState(
+    () => localStorage.getItem("isPending") === "true"
+  );
 
   // Fetch wallet balance and decimal based on token address
-  const { walletBalance, decimal } = useWalletBalance(tokenAddress, isTokenAddressVerified);
+  const { walletBalance, decimal } = useWalletBalance(
+    tokenAddress,
+    isTokenAddressVerified
+  );
   const { data: hash, error, writeContract, isPending } = useWriteContract();
 
   // State for displaying the current transaction hash
-  const [displayHash, setDisplayHash] = useState<`0x${string}`>(() => 
-    localStorage.getItem('currentTransactionHash') as `0x${string}` || undefined
+  const [displayHash, setDisplayHash] = useState<`0x${string}`>(
+    () =>
+      (localStorage.getItem("currentTransactionHash") as `0x${string}`) ||
+      undefined
   );
 
   // Effect to update local storage with the current transaction hash
   useEffect(() => {
     if (hash) {
-      localStorage.setItem('currentTransactionHash', hash);
+      localStorage.setItem("currentTransactionHash", hash);
     }
   }, [hash]);
 
   // Effect to handle changes in local storage for transaction hash
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'currentTransactionHash' && e.newValue) {
+      if (e.key === "currentTransactionHash" && e.newValue) {
         setDisplayHash(e.newValue as `0x${string}`);
       }
     };
-  
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
   // Wait for transaction receipt and handle replacement scenarios
-  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
-    hash,
-    onReplaced: replacement => {
-      if (replacement.reason === "repriced") {
-        setIsReplaced(true);
-        setNewHash(replacement.transactionReceipt.transactionHash);
-        localStorage.setItem("isReplaced", "true");
-        localStorage.setItem("newHash", replacement.transactionReceipt.transactionHash);
-        const event = new CustomEvent('transactionReplaced', {
-          detail: {
-            newHash: replacement.transactionReceipt.transactionHash,
-            isReplaced: true
-          }
-        });
-        window.dispatchEvent(event);
-      }
-    }
-  });
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+    useWaitForTransactionReceipt({
+      hash,
+      onReplaced: (replacement) => {
+        if (replacement.reason === "repriced") {
+          setIsReplaced(true);
+          setNewHash(replacement.transactionReceipt.transactionHash);
+          localStorage.setItem("isReplaced", "true");
+          localStorage.setItem(
+            "newHash",
+            replacement.transactionReceipt.transactionHash
+          );
+          const event = new CustomEvent("transactionReplaced", {
+            detail: {
+              newHash: replacement.transactionReceipt.transactionHash,
+              isReplaced: true,
+            },
+          });
+          window.dispatchEvent(event);
+        }
+      },
+    });
 
   // Effect to handle storage changes for replacement status and new hash
   useEffect(() => {
@@ -83,24 +98,32 @@ export function SendTransaction() {
         setNewHash(e.newValue || "");
       }
     };
-    
-    const handleTransactionReplaced = (e: CustomEvent<{ newHash: string; isReplaced: boolean }>) => {
+
+    const handleTransactionReplaced = (
+      e: CustomEvent<{ newHash: string; isReplaced: boolean }>
+    ) => {
       setIsReplaced(e.detail.isReplaced);
       setNewHash(e.detail.newHash);
     };
-    
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('transactionReplaced', handleTransactionReplaced as EventListener);
-    
+
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener(
+      "transactionReplaced",
+      handleTransactionReplaced as EventListener
+    );
+
     const storedIsReplaced = localStorage.getItem("isReplaced");
     const storedNewHash = localStorage.getItem("newHash");
-    
+
     if (storedIsReplaced) setIsReplaced(storedIsReplaced === "true");
     if (storedNewHash) setNewHash(storedNewHash);
-    
+
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('transactionReplaced', handleTransactionReplaced as EventListener);
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener(
+        "transactionReplaced",
+        handleTransactionReplaced as EventListener
+      );
     };
   }, []);
 
@@ -111,13 +134,21 @@ export function SendTransaction() {
 
   // Effect to handle custom pending state changes
   useEffect(() => {
-    const handlePendingStateChange = (event: CustomEvent<{ isPending: boolean }>) => {
+    const handlePendingStateChange = (
+      event: CustomEvent<{ isPending: boolean }>
+    ) => {
       setLocalIsPending(event.detail.isPending);
     };
 
-    window.addEventListener('pendingStateChange', handlePendingStateChange as EventListener);
+    window.addEventListener(
+      "pendingStateChange",
+      handlePendingStateChange as EventListener
+    );
     return () => {
-      window.removeEventListener('pendingStateChange', handlePendingStateChange as EventListener);
+      window.removeEventListener(
+        "pendingStateChange",
+        handlePendingStateChange as EventListener
+      );
     };
   }, []);
 
@@ -153,7 +184,6 @@ export function SendTransaction() {
       localStorage.setItem("toastType", "success");
       localStorage.setItem("toastMessage", successMessage);
       toast.success(successMessage);
-      
     } catch (error) {
       setIsTokenAddressVerified(false);
       const errorMessage = "Invalid token address format";
@@ -170,7 +200,9 @@ export function SendTransaction() {
     localStorage.setItem("recipient", recipient);
     localStorage.setItem("amount", amount);
 
-    const amountInSmallestUnit = BigInt(Math.floor(parseFloat(amount) * (10 ** decimal)));
+    const amountInSmallestUnit = BigInt(
+      Math.floor(parseFloat(amount) * 10 ** decimal)
+    );
 
     writeContract({
       address: getAddress(tokenAddress),
@@ -192,7 +224,7 @@ export function SendTransaction() {
       </div>
       <div className="flex flex-col items-center justify-center bg-gray-100 p-4">
         <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-          <TokenAddressInput 
+          <TokenAddressInput
             tokenAddress={tokenAddress}
             setTokenAddress={setTokenAddress}
             checkTokenValidity={checkTokenValidity}
@@ -200,7 +232,7 @@ export function SendTransaction() {
             setIsTokenAddressVerified={setIsTokenAddressVerified}
           />
 
-          <TransferForm 
+          <TransferForm
             isTokenAddressVerified={isTokenAddressVerified}
             recipient={recipient}
             setRecipient={setRecipient}
@@ -212,10 +244,10 @@ export function SendTransaction() {
             onSubmit={submit}
           />
 
-          <TransactionHashDisplay 
-            hash={(hash || displayHash) as `0x${string}`} 
-            isReplaced={isReplaced} 
-            newHash={newHash as `0x${string}`} 
+          <TransactionHashDisplay
+            hash={(hash || displayHash) as `0x${string}`}
+            isReplaced={isReplaced}
+            newHash={newHash as `0x${string}`}
           />
         </div>
       </div>

@@ -1,16 +1,18 @@
-import { useEffect, useState } from 'react';
-import { useBalance, useAccount } from 'wagmi';
+import { useEffect, useState } from "react";
+import { useBalance, useAccount } from "wagmi";
 
-export function useWalletBalance(tokenAddress: string, isTokenAddressVerified: boolean) {
+export function useWalletBalance(
+  tokenAddress: string,
+  isTokenAddressVerified: boolean
+) {
   // fetching current account info and token balance
   const account = useAccount();
-  const { data: balance } = useBalance({ 
+  const { data: balance } = useBalance({
     address: account.address,
-    token: isTokenAddressVerified ? tokenAddress as `0x${string}` : undefined
+    token: isTokenAddressVerified ? (tokenAddress as `0x${string}`) : undefined,
   });
   const [walletBalance, setWalletBalance] = useState<number>(0);
   const [decimal, setDecimal] = useState<number>(0);
-  
 
   function convertBalanceToNormal(balance: {
     decimals: number;
@@ -36,4 +38,4 @@ export function useWalletBalance(tokenAddress: string, isTokenAddressVerified: b
 
   // return wallet balance and decimal
   return { walletBalance, decimal };
-} 
+}
