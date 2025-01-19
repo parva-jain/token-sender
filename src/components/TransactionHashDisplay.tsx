@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+
 interface TransactionHashDisplayProps {
   hash: `0x${string}` | undefined;
   isReplaced: boolean;
@@ -9,7 +11,30 @@ export function TransactionHashDisplay({
   isReplaced,
   newHash,
 }: TransactionHashDisplayProps) {
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    // Reseting visibility when either hash changes
+    setVisible(true);
+
+    // Starting timer if we have either a valid hash or newHash
+    if ((hash && hash !== "0x") || (newHash && newHash !== "0x")) {
+      const timer = setTimeout(() => {
+        setVisible(false);
+        // Clearing from localStorage
+        localStorage.removeItem("currentTransactionHash");
+        localStorage.removeItem("newTransactionHash");
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [hash, newHash]);
+
   if (!hash || hash === "0x") return null;
+
+  console.log("Rendering hash:", hash, "visible:", visible); // Debug log
+
+  if (!visible) return null;
 
   return (
     <div className="mt-4">
