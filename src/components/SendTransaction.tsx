@@ -196,6 +196,16 @@ export function SendTransaction() {
   // Function to handle form submission for the transaction
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+
+    // Clear old transaction-related values
+    localStorage.removeItem("currentTransactionHash");
+    localStorage.removeItem("isReplaced");
+    localStorage.removeItem("newHash");
+    setIsReplaced(false);
+    setNewHash("");
+    setDisplayHash("0x");
+
+    // Store new transaction details
     localStorage.setItem("tokenAddress", tokenAddress);
     localStorage.setItem("recipient", recipient);
     localStorage.setItem("amount", amount);

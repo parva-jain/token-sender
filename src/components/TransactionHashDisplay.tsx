@@ -24,15 +24,13 @@ export function TransactionHashDisplay({
         // Clearing from localStorage
         localStorage.removeItem("currentTransactionHash");
         localStorage.removeItem("newTransactionHash");
-      }, 5000);
+      }, 10000);
 
       return () => clearTimeout(timer);
     }
   }, [hash, newHash]);
 
   if (!hash || hash === "0x") return null;
-
-  console.log("Rendering hash:", hash, "visible:", visible); // Debug log
 
   if (!visible) return null;
 
